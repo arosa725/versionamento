@@ -1,0 +1,25 @@
+1. Criar o Repositório do Perfil
+Se o aluno ainda não tem, ele precisa criar um repositório "mágico":
+
+Vá em New Repository.
+
+No nome do repositório, digite exatamente o seu nome de usuário (ex: se o usuário é joaozinho, o repositório deve ser joaozinho).
+
+O GitHub exibirá um aviso dizendo que você descobriu um "segredo".
+
+Marque como Public e marque a opção Add a README file.
+
+2. Preparar a Imagem
+Crie uma imagem (no Canva ou Figma) com o tamanho aproximado de 1200x300px.
+
+Salve-a como banner.png ou capa.jpg.
+
+3. Fazer o Upload da Capa
+Existem duas formas de colocar a imagem lá:
+
+Opção A: Via Upload Direto (Mais fácil)
+Entre no repositório do perfil que você criou.
+
+Clique em Add file -> Upload files.
+
+Arraste sua imagem de capa e faça o Commit.
