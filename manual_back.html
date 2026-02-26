@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploy Back-end - Inetz Lab</title>
+    <style>
+        :root { --primary: #10b981; --bg: #f8fafc; --code-bg: #0f172a; --text: #1e293b; --accent: #3b82f6; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        header { border-bottom: 2px solid #e2e8f0; margin-bottom: 30px; text-align: center; padding-bottom: 10px; }
+        h1 { color: var(--primary); margin: 0; }
+        .step { margin-bottom: 40px; border-left: 4px solid #e2e8f0; padding-left: 25px; position: relative; }
+        .step:hover { border-left-color: var(--primary); }
+        h2 { font-size: 1.2rem; color: var(--accent); margin-top: 0; }
+        pre { background: var(--code-bg); color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; position: relative; }
+        code { font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+        .badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .warning-box { background: #fff7ed; border-left: 4px solid #f97316; padding: 15px; margin: 20px 0; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🚀 Subindo o Back-end (CadAlu)</h1>
+        <p>Configurando a API Node.js para rodar 24/7 no servidor.</p>
+    </header>
+
+    <div class="step">
+        <span class="badge">Passo 1</span>
+        <h2>Preparar o arquivo de Entrada</h2>
+        <p>Garanta que o seu arquivo principal se chama <code>server.js</code> e que a porta é definida via variável de ambiente:</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Copiar Exemplo</button><code>const express = require('express');
+const cors = require('cors');
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.post('/api/cadalu', (req, res) => {
+    console.log("Dados recebidos:", req.body);
+    res.status(201).send({ status: "Palavra recebida!" });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Rodando na porta ${PORT}`));</code></pre>
+    </div>
+
+    <div class="step">
+        <span class="badge">Passo 2</span>
+        <h2>O arquivo .gitignore</h2>
+        <p>Nunca envie a pasta <code>node_modules</code> para o GitHub. Crie um arquivo <code>.gitignore</code> na raiz do projeto:</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Copiar</button><code>node_modules
+.env
+*.log</code></pre>
+    </div>
+
+    <div class="step">
+        <span class="badge">Passo 3</span>
+        <h2>Configurar o Workflow de Deploy</h2>
+        <p>No GitHub, crie o arquivo <code>.github/workflows/main.yml</code>. Este script vai copiar os arquivos e pedir para o <strong>PM2</strong> reiniciar a API no servidor:</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Copiar Workflow</button><code>name: Deploy Back-end
+on: [push]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Enviar Arquivos (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          source: "./*"
+          target: "/var/inetpub/wwwroot/projetos/${{ secrets.ALUNO_RA }}/back/${{ secrets.ALUNO_PROJETO }}"
+
+      - name: Reiniciar API via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /var/inetpub/wwwroot/projetos/${{ secrets.ALUNO_RA }}/back/${{ secrets.ALUNO_PROJETO }}
+            npm install --production
+            pm2 delete "api-${{ secrets.ALUNO_RA }}" || true
+            pm2 start server.js --name "api-${{ secrets.ALUNO_RA }}"</code></pre>
+    </div>
+
+    <div class="step">
+        <span class="badge">Passo 4</span>
+        <h2>Configurar Secrets e Push</h2>
+        <p>Certifique-se de que os Secrets (<code>SSH_HOST</code>, <code>SSH_KEY</code>, <code>ALUNO_RA</code>, <code>ALUNO_PROJETO</code>) estão configurados no GitHub e execute:</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Comandos Git</button><code>git add .
+git commit -m "feat: subindo back-end cadalu"
+git push origin main</code></pre>
+    </div>
+
+    <div class="warning-box">
+        <strong>💡 Dica do Professor:</strong> O comando <code>pm2</code> garante que sua API continue rodando mesmo se você fechar o terminal. Se precisar ver os erros no servidor, use <code>pm2 logs</code> via SSH.
+    </div>
+
+    <footer>
+        <p style="text-align:center; color:#94a3b8">
+            Inetz Lab &copy; 2026 - A Palavra: O código é o caminho, a API é a ponte.
+        </p>
+    </footer>
+</div>
+
+<script>
+    function copy(btn) {
+        const code = btn.nextElementSibling.innerText;
+        navigator.clipboard.writeText(code);
+        btn.innerText = "Copiado!";
+        setTimeout(() => btn.innerText = "Copiar", 2000);
+    }
+</script>
+</body>
+</html>
