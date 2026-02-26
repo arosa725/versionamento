@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antes de Iniciar - Inetz Lab</title>
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --code-bg: #0f172a; --text: #1e293b; --accent: #7c3aed; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        header { border-bottom: 2px solid #e2e8f0; margin-bottom: 30px; text-align: center; padding-bottom: 10px; }
+        h1 { color: var(--accent); margin: 0; }
+        .step { margin-bottom: 40px; border-left: 4px solid #e2e8f0; padding-left: 25px; position: relative; }
+        .step:hover { border-left-color: var(--accent); }
+        h2 { font-size: 1.3rem; color: var(--primary); margin-top: 0; }
+        pre { background: var(--code-bg); color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; position: relative; }
+        code { font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+        .badge { background: #ede9fe; color: #6d28d9; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .secret-list { background: #f1f5f9; padding: 15px; border-radius: 8px; list-style: none; padding-left: 20px; }
+        .secret-list li { margin-bottom: 8px; font-family: monospace; }
+        .secret-list li strong { color: #be185d; }
+        .alert-box { background: #fff1f2; border-left: 4px solid #f43f5e; padding: 15px; margin: 20px 0; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🛠️ Configuração de Ambiente</h1>
+        <p>Prepare o GitHub para transformar seu código em um site vivo.</p>
+    </header>
+
+    <div class="step">
+        <span class="badge">Fase 1</span>
+        <h2>Criar o Repositório no GitHub</h2>
+        <p>1. Acesse <a href="https://github.com/new" target="_blank">github.com/new</a>.</p>
+        <p>2. Dê um nome ao projeto e selecione <strong>Private</strong> (Obrigatório para segurança).</p>
+        <p>3. <strong>Não marque</strong> as opções de README, .gitignore ou License. Deixe o repositório totalmente vazio.</p>
+        <p>4. Clique em <em>Create Repository</em>.</p>
+    </div>
+
+    <div class="step">
+        <span class="badge">Fase 2</span>
+        <h2>Configurar Variáveis Secretas (Secrets)</h2>
+        <p>No GitHub, vá em <strong>Settings</strong> > <strong>Secrets and variables</strong> > <strong>Actions</strong>. Clique em <em>New repository secret</em> para cada item abaixo:</p>
+        <ul class="secret-list">
+            <li><strong>SSH_HOST</strong>: O IP do servidor Inetz (fornecido pelo professor).</li>
+            <li><strong>SSH_KEY</strong>: Cole aqui o conteúdo da sua <strong>key_alunos</strong> (Chave Privada).</li>
+            <li><strong>ALUNO_RA</strong>: Seu número de RA (apenas números).</li>
+            <li><strong>ALUNO_PROJETO</strong>: O nome da pasta do seu projeto (sem espaços ou acentos).</li>
+        </ul>
+        <div class="alert-box">
+            <strong>Cuidado:</strong> Nunca cole a chave <em>pública</em> (.pub) aqui. O Actions precisa da chave <strong>privada</strong> para ter permissão de entrar no servidor.
+        </div>
+    </div>
+
+    <div class="step">
+        <span class="badge">Fase 3</span>
+        <h2>Configurar o Workflow (Actions)</h2>
+        <p>Crie uma pasta no seu projeto chamada <code>.github</code> e, dentro dela, outra chamada <code>workflows</code>. Lá dentro, crie o arquivo <code>main.yml</code>:</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Copiar Estrutura</button><code># Caminho: .github/workflows/main.yml
+name: Deploy Inetz
+on: [push] # Dispara a cada 'git push'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # O professor indicará o script de build específico aqui (React, Static ou IA)</code></pre>
+    </div>
+
+    <div class="step">
+        <span class="badge">Fase 4</span>
+        <h2>Conectar e Enviar</h2>
+        <p>Agora, conecte seu PC ao GitHub usando sua identidade padrão (<code>id_ed25519</code>):</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Copiar</button><code>git init
+git add .
+git commit -m "feat: configuração de infraestrutura"
+git branch -M main
+git remote add origin git@github.com:SEU_USUARIO/SEU_PROJETO.git
+git push -u origin main</code></pre>
+    </div>
+
+    <footer>
+        <p style="text-align:center; color:#94a3b8">
+            <strong>A Palavra:</strong> Os Secrets protegem sua casa, o Workflow é seu empregado, o Push é sua ordem. <br>
+            Inetz Lab &copy; 2026
+        </p>
+    </footer>
+</div>
+
+<script>
+    function copy(btn) {
+        const code = btn.nextElementSibling.innerText;
+        navigator.clipboard.writeText(code);
+        btn.innerText = "Copiado!";
+        setTimeout(() => btn.innerText = "Copiar", 2000);
+    }
+</script>
+</body>
+</html>

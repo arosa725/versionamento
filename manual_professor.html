@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual do Professor - Inetz Lab</title>
+    <style>
+        :root { --primary: #0f172a; --accent: #2563eb; --success: #10b981; --bg: #f1f5f9; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: #334155; line-height: 1.6; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        header { border-bottom: 4px solid var(--accent); margin-bottom: 30px; padding-bottom: 10px; }
+        h1 { margin: 0; color: var(--primary); }
+        h2 { color: var(--accent); border-left: 5px solid var(--accent); padding-left: 15px; margin-top: 40px; }
+        h3 { color: var(--primary); margin-top: 25px; display: flex; align-items: center; }
+        .type-badge { font-size: 0.7rem; background: #e2e8f0; padding: 2px 8px; border-radius: 4px; margin-left: 10px; text-transform: uppercase; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; }
+        
+        pre { background: #1e293b; color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; position: relative; font-size: 0.85rem; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: var(--accent); border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; z-index: 10; }
+        
+        .path-info { background: #fff7ed; border-left: 4px solid #f97316; padding: 15px; margin: 20px 0; font-family: monospace; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Manual do Professor: Ecossistema Inetz Lab</h1>
+        <p>Padronização de Deploy para Projetos Estáticos, React/Vue e IA.</p>
+    </header>
+
+    <section>
+        <h2>1. Estrutura de Diretórios no Nginx</h2>
+        <p>O servidor está organizado para hospedar múltiplos projetos por aluno via Nginx.</p>
+        <div class="path-info">
+            /var/inetpub/wwwroot/projetos/<strong>${ALUNO_RA}</strong>/<strong>${TIPO}</strong>/<strong>${PROJETO}</strong>
+        </div>
+        <table>
+            <tr><th>Tipo</th><th>Pasta Alvo</th><th>URL de Acesso</th></tr>
+            <tr><td>Estático</td><td><code>/front/</code></td><td>lab.inetz.com.br/RA/front/projeto/index.html</td></tr>
+            <tr><td>React/Vue</td><td><code>/front/</code></td><td>lab.inetz.com.br/RA/front/projeto/ (SPA)</td></tr>
+            <tr><td>IA / Python</td><td><code>/ia/</code></td><td>lab.inetz.com.br/RA/ia/projeto/</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>2. Configuração de Secrets (Obrigatório)</h2>
+        <p>Para qualquer deploy, o aluno deve configurar estas chaves no Repositório do GitHub:</p>
+        <div class="grid">
+            <div class="card">
+                <strong>SSH_HOST:</strong> IP do servidor Inetz.<br>
+                <strong>SSH_KEY:</strong> Conteúdo da <code>key_alunos</code> (Chave Privada).
+            </div>
+            <div class="card">
+                <strong>ALUNO_RA:</strong> RA numérico do aluno.<br>
+                <strong>ALUNO_PROJETO:</strong> Nome da subpasta do projeto.
+            </div>
+        </div>
+    </section>
+
+    <h2>3. Modelos de Workflow (CI/CD)</h2>
+
+    <h3>A. HTML/CSS/JS Estático <span class="type-badge">Nginx Static</span></h3>
+    <p>Ideal para iniciantes. Apenas copia os arquivos da raiz para o servidor.</p>
+    <pre><button class="copy-btn" onclick="copy(this)">Copiar</button><code>name: Deploy Estático
+on: [push]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          source: "./*"
+          target: "/var/inetpub/wwwroot/projetos/${{ secrets.ALUNO_RA }}/front/${{ secrets.ALUNO_PROJETO }}"</code></pre>
+
+    <h3>B. React / Vue / Vite <span class="type-badge">Nginx SPA</span></h3>
+    <p>Executa o <code>npm build</code> no GitHub e envia apenas a pasta <code>dist</code>.</p>
+    <pre><button class="copy-btn" onclick="copy(this)">Copiar</button><code>name: Deploy React-Vue
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+      - name: Deploy via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          source: "dist/*"
+          target: "/var/inetpub/wwwroot/projetos/${{ secrets.ALUNO_RA }}/front/${{ secrets.ALUNO_PROJETO }}"
+          strip_components: 1</code></pre>
+
+    <h3>C. IA e Scripts Python <span class="type-badge">Data Science</span></h3>
+    <p>Envia scripts, modelos (.pkl, .h5) e datasets para a pasta de IA.</p>
+    <pre><button class="copy-btn" onclick="copy(this)">Copiar</button><code>name: Deploy IA
+on: [push]
+jobs:
+  deploy-ia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Python Files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: root
+          key: ${{ secrets.SSH_KEY }}
+          source: "*.py,*.pkl,*.csv,requirements.txt"
+          target: "/var/inetpub/wwwroot/projetos/${{ secrets.ALUNO_RA }}/ia/${{ secrets.ALUNO_PROJETO }}"</code></pre>
+
+    <section style="margin-top: 40px; padding: 20px; background: #fef2f2; border-radius: 8px;">
+        <h3>🚨 Lembretes Críticos para o Professor</h3>
+        <ul>
+            <li><strong>Chave do Aluno:</strong> O aluno deve gerar a <code>id_ed25519</code> no PC dele apenas para o Git Push.</li>
+            <li><strong>Chave do Servidor:</strong> No GitHub Secrets, use SEMPRE a <code>key_alunos</code>.</li>
+            <li><strong>Permissões:</strong> O Nginx precisa de permissão de leitura na pasta criada. Caso o site dê 403, verifique as permissões no servidor.</li>
+        </ul>
+    </section>
+
+    <footer>
+        <p style="text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 40px;">
+            A Palavra: O Nginx serve, o GitHub constrói, você cria. <br>Inetz Lab 2026
+        </p>
+    </footer>
+</div>
+
+<script>
+    function copy(btn) {
+        const code = btn.nextElementSibling.innerText;
+        navigator.clipboard.writeText(code);
+        btn.innerText = "Copiado!";
+        setTimeout(() => btn.innerText = "Copiar", 2000);
+    }
+</script>
+</body>
+</html>

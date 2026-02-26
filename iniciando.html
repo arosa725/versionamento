@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciando o Deploy - Inetz Lab</title>
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --code-bg: #0f172a; --text: #1e293b; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        header { border-bottom: 2px solid #e2e8f0; margin-bottom: 30px; text-align: center; }
+        h1 { color: var(--primary); }
+        .step { margin-bottom: 40px; border-left: 4px solid #e2e8f0; padding-left: 25px; position: relative; }
+        .step:hover { border-left-color: var(--primary); }
+        pre { background: var(--code-bg); color: #f8fafc; padding: 15px; border-radius: 8px; overflow-x: auto; position: relative; }
+        code { font-family: 'Fira Code', monospace; font-size: 0.9rem; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+        .badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .alert { background: #fff7ed; border: 1px solid #ffedd5; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🏁 Primeiro Push e Publicação</h1>
+        <p>Aprenda a conectar seu computador ao GitHub e publicar no servidor Inetz.</p>
+    </header>
+
+    <div class="step">
+        <span class="badge">Passo 1</span>
+        <h2>Gerar Identidade SSH</h2>
+        <p>No terminal, gere sua chave. Aperte <strong>ENTER</strong> em todas as perguntas (não coloque senha agora).</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Copiar</button><code>ssh-keygen -t ed25519 -C "seu-email@exemplo.com"</code></pre>
+    </div>
+
+    <div class="step">
+        <span class="badge">Passo 2</span>
+        <h2>Cadastrar no GitHub</h2>
+        <p>Copie sua chave pública e cole em <em>Settings > SSH Keys > New SSH Key</em> no seu GitHub.</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Copiar</button><code># No Windows:
+cat ~/.ssh/id_ed25519.pub | clip
+
+# No Mac:
+pbcopy < ~/.ssh/id_ed25519.pub</code></pre>
+    </div>
+
+    <div class="step">
+        <span class="badge">Passo 3</span>
+        <h2>Criar Repositório Privado</h2>
+        <p>Crie o repositório no GitHub como <strong>Private</strong> e NÃO marque a opção de criar README.</p>
+        <pre><button class="copy-btn" onclick="copy(this)">Copiar</button><code>git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin git@github.com:SEU_USUARIO/SEU_REPOSITORIO.git
+git push -u origin main</code></pre>
+    </div>
+
+    <div class="alert">
+        <strong>💡 A Palavra:</strong> Ao usar o nome padrão <code>id_ed25519</code>, o Git reconhece sua identidade automaticamente. Se o terminal perguntar <em>"continue connecting?"</em>, digite <strong>yes</strong>.
+    </div>
+
+    <footer><p style="text-align:center; color:#94a3b8">Inetz Lab 2026</p></footer>
+</div>
+<script>
+    function copy(el) {
+        const code = el.nextElementSibling.innerText;
+        navigator.clipboard.writeText(code);
+        el.innerText = "Copiado!";
+        setTimeout(() => el.innerText = "Copiar", 2000);
+    }
+</script>
+</body>
+</html>
